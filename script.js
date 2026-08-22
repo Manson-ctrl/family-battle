@@ -50,3 +50,8 @@ document.addEventListener("keydown", function(event) {
     }
 
 });
+setInterval(function() {
+
+    moveBullets();
+
+}, 30);
