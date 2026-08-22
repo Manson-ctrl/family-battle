@@ -25,20 +25,20 @@ h1 {
     overflow: hidden;
     border: 2px solid white;
 }
-}
-
 #player {
     position: absolute;
     left: 50%;
-    bottom: 30px;
-    font-size: 55px;
+    bottom: 40px;
+    font-size: 70px;
     transform: translateX(-50%);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
 }
 
 #enemy {
     position: absolute;
-    top: 40px;
+    top: 50px;
     left: 50%;
-    font-size: 45px;
+    font-size: 60px;
     transform: translateX(-50%);
+    filter: drop-shadow(0 0 8px rgba(255, 100, 255, 0.8));
 }
