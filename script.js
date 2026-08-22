@@ -1,13 +1,25 @@
-const player = document.querySelector("p");
+const player = document.getElementById("player");
+
+let playerX = 50;
 
 document.addEventListener("keydown", function(event) {
 
     if (event.key === "ArrowLeft") {
-        player.textContent = "⬅️ Success is moving left!";
+        playerX -= 5;
     }
 
     if (event.key === "ArrowRight") {
-        player.textContent = "Success is moving right! ➡️";
+        playerX += 5;
     }
+
+    if (playerX < 5) {
+        playerX = 5;
+    }
+
+    if (playerX > 95) {
+        playerX = 95;
+    }
+
+    player.style.left = playerX + "%";
 
 });
