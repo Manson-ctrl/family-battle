@@ -1,0 +1,1025 @@
+// ======================================
+// FAMILY BATTLE
+// COMBAT ENGINE
+// ======================================
+
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+
+const leftBtn = document.getElementById("leftBtn");
+const rightBtn = document.getElementById("rightBtn");
+const fireButton = document.getElementById("fireButton");
+
+const playerHealthBar =
+    document.getElementById("playerHealth");
+
+const playerHealthText =
+    document.getElementById("playerHealthText");
+
+const killCount =
+    document.getElementById("killCount");
+
+
+// ======================================
+// PLAYER
+// ======================================
+
+let playerX = 50;
+
+let playerHealth = 1000;
+
+const MAX_PLAYER_HEALTH = 1000;
+
+
+// Movement speed
+const PLAYER_SPEED = 1.5;
+
+let movingLeft = false;
+let movingRight = false;
+
+
+// ======================================
+// GAME OBJECTS
+// ======================================
+
+let bullets = [];
+
+let enemyBullets = [];
+
+let enemies = [];
+
+let kills = 0;
+
+
+// ======================================
+// PLAYER MOVEMENT
+// ======================================
+
+function updatePlayerMovement() {
+
+    if (movingLeft) {
+
+        playerX -= PLAYER_SPEED;
+    }
+
+    if (movingRight) {
+
+        playerX += PLAYER_SPEED;
+    }
+
+
+    // Keep Success inside battlefield
+
+    if (playerX < 5) {
+
+        playerX = 5;
+    }
+
+    if (playerX > 95) {
+
+        playerX = 95;
+    }
+
+
+    player.style.left =
+        playerX + "%";
+}
+
+
+// ======================================
+// MOBILE CONTROLS
+// ======================================
+
+// LEFT
+
+leftBtn.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        movingLeft = true;
+    }
+);
+
+
+leftBtn.addEventListener(
+    "pointerup",
+    function() {
+
+        movingLeft = false;
+    }
+);
+
+
+leftBtn.addEventListener(
+    "pointercancel",
+    function() {
+
+        movingLeft = false;
+    }
+);
+
+
+leftBtn.addEventListener(
+    "pointerleave",
+    function() {
+
+        movingLeft = false;
+    }
+);
+
+
+// RIGHT
+
+rightBtn.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        movingRight = true;
+    }
+);
+
+
+rightBtn.addEventListener(
+    "pointerup",
+    function() {
+
+        movingRight = false;
+    }
+);
+
+
+rightBtn.addEventListener(
+    "pointercancel",
+    function() {
+
+        movingRight = false;
+    }
+);
+
+
+rightBtn.addEventListener(
+    "pointerleave",
+    function() {
+
+        movingRight = false;
+    }
+);
+
+
+// ======================================
+// KEYBOARD
+// ======================================
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "ArrowLeft" ||
+            event.key.toLowerCase() === "a") {
+
+            movingLeft = true;
+        }
+
+
+        if (event.key === "ArrowRight" ||
+            event.key.toLowerCase() === "d") {
+
+            movingRight = true;
+        }
+
+
+        if (event.code === "Space") {
+
+            shoot();
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    function(event) {
+
+        if (event.key === "ArrowLeft" ||
+            event.key.toLowerCase() === "a") {
+
+            movingLeft = false;
+        }
+
+
+        if (event.key === "ArrowRight" ||
+            event.key.toLowerCase() === "d") {
+
+            movingRight = false;
+        }
+
+    }
+);
+
+
+// ======================================
+// PLAYER SHOOTING
+// ======================================
+
+let lastShot = 0;
+
+const SHOT_DELAY = 180;
+
+
+function shoot() {
+
+    const now = Date.now();
+
+
+    // Prevent impossible machine-gun speed
+
+    if (now - lastShot < SHOT_DELAY) {
+
+        return;
+    }
+
+
+    lastShot = now;
+
+
+    const bullet =
+        document.createElement("div");
+
+
+    bullet.className =
+        "bullet";
+
+
+    bullet.textContent =
+        "🔥";
+
+
+    // Start directly above Success
+
+    bullet.style.left =
+        playerX + "%";
+
+
+    bullet.style.bottom =
+        "100px";
+
+
+    game.appendChild(bullet);
+
+
+    bullets.push(bullet);
+}
+
+
+// FIRE BUTTON
+
+fireButton.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        shoot();
+    }
+);
+
+
+// ======================================
+// CREATE ENEMY
+// ======================================
+
+function createEnemy() {
+
+    const enemy =
+        document.createElement("div");
+
+
+    enemy.className =
+        "enemy";
+
+
+    // Enemy body
+
+    const body =
+        document.createElement("div");
+
+
+    body.className =
+        "enemyBody";
+
+
+    body.textContent =
+        "👾";
+
+
+    // Enemy health bar
+
+    const health =
+        document.createElement("div");
+
+
+    health.className =
+        "enemyHp";
+
+
+    const healthBar =
+        document.createElement("div");
+
+
+    healthBar.className =
+        "enemyHpBar";
+
+
+    health.appendChild(
+        healthBar
+    );
+
+
+    enemy.appendChild(body);
+
+    enemy.appendChild(health);
+
+
+    // Random position
+
+    const maxLeft =
+        game.clientWidth - 70;
+
+
+    const randomLeft =
+        Math.random() * maxLeft;
+
+
+    enemy.style.left =
+        randomLeft + "px";
+
+
+    enemy.style.top =
+        "-80px";
+
+
+    // Enemy stats
+
+    enemy.health = 100;
+
+    enemy.maxHealth = 100;
+
+
+    enemy.speed =
+        0.7 +
+        Math.random() * 0.9;
+
+
+    enemy.lastAttack =
+        Date.now();
+
+
+    enemy.attackDelay =
+        900 +
+        Math.random() * 1200;
+
+
+    game.appendChild(enemy);
+
+
+    enemies.push(enemy);
+}
+
+
+// ======================================
+// ENEMY SPAWNING
+// ======================================
+
+setInterval(
+    function() {
+
+        // Maximum enemies on screen
+
+        if (enemies.length < 8) {
+
+            createEnemy();
+        }
+
+    },
+    900
+);
+
+
+// Create initial enemies
+
+for (
+    let i = 0;
+    i < 4;
+    i++
+) {
+
+    setTimeout(
+        createEnemy,
+        i * 400
+    );
+}
+
+
+// ======================================
+// ENEMY SHOOTING
+// ======================================
+
+function enemyShoot(enemy) {
+
+    const projectile =
+        document.createElement("div");
+
+
+    projectile.className =
+        "enemyBullet";
+
+
+    projectile.textContent =
+        "💣";
+
+
+    // Enemy center
+
+    const enemyX =
+        parseFloat(enemy.style.left) +
+        30;
+
+
+    const enemyY =
+        parseFloat(enemy.style.top) +
+        55;
+
+
+    projectile.style.left =
+        enemyX + "px";
+
+
+    projectile.style.top =
+        enemyY + "px";
+
+
+    // Calculate direction toward Success
+
+    const playerRect =
+        player.getBoundingClientRect();
+
+
+    const gameRect =
+        game.getBoundingClientRect();
+
+
+    const playerCenterX =
+        playerRect.left -
+        gameRect.left +
+        playerRect.width / 2;
+
+
+    const playerCenterY =
+        playerRect.top -
+        gameRect.top +
+        playerRect.height / 2;
+
+
+    const dx =
+        playerCenterX - enemyX;
+
+
+    const dy =
+        playerCenterY - enemyY;
+
+
+    const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+
+
+    projectile.dx =
+        dx / distance * 5;
+
+
+    projectile.dy =
+        dy / distance * 5;
+
+
+    game.appendChild(
+        projectile
+    );
+
+
+    enemyBullets.push(
+        projectile
+    );
+}
+
+
+// ======================================
+// UPDATE ENEMY BULLETS
+// ======================================
+
+function updateEnemyBullets() {
+
+    for (
+        let i = enemyBullets.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const bullet =
+            enemyBullets[i];
+
+
+        let left =
+            parseFloat(
+                bullet.style.left
+            );
+
+
+        let top =
+            parseFloat(
+                bullet.style.top
+            );
+
+
+        left += bullet.dx;
+
+        top += bullet.dy;
+
+
+        bullet.style.left =
+            left + "px";
+
+
+        bullet.style.top =
+            top + "px";
+
+
+        // Hit Success
+
+        if (
+            checkCollision(
+                bullet,
+                player
+            )
+        ) {
+
+            bullet.remove();
+
+            enemyBullets.splice(
+                i,
+                1
+            );
+
+
+            damagePlayer(20);
+
+
+            continue;
+        }
+
+
+        // Remove outside battlefield
+
+        if (
+            left < -50 ||
+            left > game.clientWidth + 50 ||
+            top < -50 ||
+            top > game.clientHeight + 50
+        ) {
+
+            bullet.remove();
+
+            enemyBullets.splice(
+                i,
+                1
+            );
+        }
+
+    }
+}
+
+
+// ======================================
+// ENEMY UPDATE
+// ======================================
+
+function updateEnemies() {
+
+    const now =
+        Date.now();
+
+
+    const playerRect =
+        player.getBoundingClientRect();
+
+
+    for (
+        let i = enemies.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const enemy =
+            enemies[i];
+
+
+        // ==================================
+        // ENEMY ATTACK
+        // ==================================
+
+        if (
+            now -
+            enemy.lastAttack >
+            enemy.attackDelay
+        ) {
+
+            enemy.lastAttack =
+                now;
+
+
+            enemyShoot(
+                enemy
+            );
+        }
+
+
+        // ==================================
+        // MOVE ENEMY
+        // ==================================
+
+        let top =
+            parseFloat(
+                enemy.style.top
+            );
+
+
+        top += enemy.speed;
+
+
+        enemy.style.top =
+            top + "px";
+
+
+        // ==================================
+        // ENEMY REACHES SUCCESS
+        // ==================================
+
+        const enemyRect =
+            enemy.getBoundingClientRect();
+
+
+        if (
+            checkCollision(
+                enemy,
+                player
+            )
+        ) {
+
+            damagePlayer(10);
+
+            enemy.remove();
+
+            enemies.splice(
+                i,
+                1
+            );
+
+
+            setTimeout(
+                createEnemy,
+                300
+            );
+
+
+            continue;
+        }
+
+
+        // Enemy leaves battlefield
+
+        if (
+            top >
+            game.clientHeight + 80
+        ) {
+
+            enemy.remove();
+
+            enemies.splice(
+                i,
+                1
+            );
+
+
+            setTimeout(
+                createEnemy,
+                300
+            );
+        }
+
+    }
+}
+
+
+// ======================================
+// PLAYER BULLETS
+// ======================================
+
+function updateBullets() {
+
+    for (
+        let i = bullets.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const bullet =
+            bullets[i];
+
+
+        let bottom =
+            parseFloat(
+                bullet.style.bottom
+            );
+
+
+        bottom += 16;
+
+
+        bullet.style.bottom =
+            bottom + "px";
+
+
+        // Check enemies
+
+        for (
+            let j = enemies.length - 1;
+            j >= 0;
+            j--
+        ) {
+
+            const enemy =
+                enemies[j];
+
+
+            if (
+                checkCollision(
+                    bullet,
+                    enemy
+                )
+            ) {
+
+                // Damage enemy
+
+                enemy.health -= 25;
+
+
+                updateEnemyHealth(
+                    enemy
+                );
+
+
+                bullet.remove();
+
+                bullets.splice(
+                    i,
+                    1
+                );
+
+
+                // Enemy dies ONLY at zero
+
+                if (
+                    enemy.health <= 0
+                ) {
+
+                    killEnemy(
+                        enemy,
+                        j
+                    );
+                }
+
+
+                break;
+            }
+        }
+
+
+        // Remove old bullet
+
+        if (
+            bottom >
+            game.clientHeight + 50
+        ) {
+
+            bullet.remove();
+
+            bullets.splice(
+                i,
+                1
+            );
+        }
+
+    }
+}
+
+
+// ======================================
+// ENEMY HEALTH BAR
+// ======================================
+
+function updateEnemyHealth(
+    enemy
+) {
+
+    const bar =
+        enemy.querySelector(
+            ".enemyHpBar"
+        );
+
+
+    const percentage =
+        Math.max(
+            0,
+            enemy.health /
+            enemy.maxHealth *
+            100
+        );
+
+
+    bar.style.width =
+        percentage + "%";
+}
+
+
+// ======================================
+// KILL ENEMY
+// ======================================
+
+function killEnemy(
+    enemy,
+    index
+) {
+
+    enemy.remove();
+
+
+    enemies.splice(
+        index,
+        1
+    );
+
+
+    kills++;
+
+
+    killCount.textContent =
+        kills;
+
+
+    // Replace enemy
+
+    setTimeout(
+        createEnemy,
+        250
+    );
+}
+
+
+// ======================================
+// PLAYER DAMAGE
+// ======================================
+
+let lastDamage = 0;
+
+
+function damagePlayer(
+    amount
+) {
+
+    const now =
+        Date.now();
+
+
+    // Prevent several bullets
+    // hitting in the same instant
+
+    if (
+        now -
+        lastDamage <
+        250
+    ) {
+
+        return;
+    }
+
+
+    lastDamage =
+        now;
+
+
+    playerHealth -=
+        amount;
+
+
+    if (
+        playerHealth < 0
+    ) {
+
+        playerHealth = 0;
+    }
+
+
+    playerHealthBar.style.width =
+        (
+            playerHealth /
+            MAX_PLAYER_HEALTH *
+            100
+        ) + "%";
+
+
+    playerHealthText.textContent =
+        playerHealth +
+        " / " +
+        MAX_PLAYER_HEALTH;
+
+
+    if (
+        playerHealth <= 0
+    ) {
+
+        gameOver();
+    }
+}
+
+
+// ======================================
+// GAME OVER
+// ======================================
+
+function gameOver() {
+
+    alert(
+        "SUCCESS HAS FALLEN!\n\n" +
+        "KILLS: " +
+        kills
+    );
+
+
+    location.reload();
+}
+
+
+// ======================================
+// COLLISION
+// ======================================
+
+function checkCollision(
+    objectA,
+    objectB
+) {
+
+    const a =
+        objectA.getBoundingClientRect();
+
+
+    const b =
+        objectB.getBoundingClientRect();
+
+
+    return (
+        a.left < b.right &&
+        a.right > b.left &&
+        a.top < b.bottom &&
+        a.bottom > b.top
+    );
+}
+
+
+// ======================================
+// MAIN GAME LOOP
+// ======================================
+
+function gameLoop() {
+
+    updatePlayerMovement();
+
+    updateBullets();
+
+    updateEnemyBullets();
+
+    updateEnemies();
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+
+gameLoop();
