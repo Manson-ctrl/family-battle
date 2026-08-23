@@ -41,4 +41,18 @@ h1 {
     font-size: 60px;
     transform: translateX(-50%);
     filter: drop-shadow(0 0 8px rgba(255, 100, 255, 0.8));
+} 
+
+#fireButton {
+    padding: 15px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+#fireButton:active {
+    transform: scale(0.95);
 }
