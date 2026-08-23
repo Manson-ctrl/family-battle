@@ -1,47 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,
+      initial-scale=1.0,
+      maximum-scale=1.0,
+      user-scalable=no">
 
-    <meta name="viewport"
-        content="width=device-width,
-        initial-scale=1.0,
-        maximum-scale=1.0,
-        user-scalable=no">
+<title>Family Battle</title>
 
-    <title>Family Battle</title>
+<style>
+* {
+    box-sizing: border-box;
+}
 
-    <link rel="stylesheet" href="style.css">
+body {
+    margin: 0;
+    background: #07111f;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    overflow: hidden;
+}
+
+h1 {
+    margin: 8px 0;
+    font-size: 24px;
+}
+
+/* CHARACTER MENU */
+
+#menu {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #07111f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#menu h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.characters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    max-width: 430px;
+}
+
+.character {
+    width: 110px;
+    height: 90px;
+    border: 2px solid #64748b;
+    border-radius: 12px;
+    background: #172033;
+    color: white;
+    font-size: 15px;
+}
+
+.character.selected {
+    border-color: #22c55e;
+    background: #14532d;
+}
+
+#startButton {
+    margin-top: 25px;
+    padding: 14px 30px;
+    border: 0;
+    border-radius: 10px;
+    background: #22c55e;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* HUD */
+
+#hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    font-size: 13px;
+}
+
+.healthBox {
+    width: 130px;
+    height: 10px;
+    background: #222;
+    border: 1px solid white;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 3px auto;
+}
+
+#healthBar {
+    width: 100%;
+    height: 100%;
+    background: #22c55e;
+}
+
+/* GAME */
+
+#game {
+    position: relative;
+    width: 100%;
+    height: 72vh;
+    overflow: hidden;
+    border: 2px solid white;
+    background:
+        radial-gradient(circle at 50% 20%, #263a55, #07111f);
+}
+
+/* PLAYER */
+
+#player {
+    position: absolute;
+    left: 50%;
+    bottom: 25px;
+    transform: translateX(-50%);
+    font-size: 65px;
+    z-index: 20;
+    user-select: none;
+}
+
+/* ENEMIES */
+
+.enemy {
+    position: absolute;
+    width: 60px;
+    text-align: center;
+    z-index: 10;
+}
+
+.enemyBody {
+    font-size: 48px;
+}
+
+.enemyHp {
+    width: 55px;
+    height: 6px;
+    background: #222;
+    border: 1px solid white;
+    margin: auto;
+}
+
+.enemyHpBar {
+    width: 100%;
+    height: 100%;
+    background: red;
+}
+
+/* BULLETS */
+
+.playerBullet,
+.enemyBullet {
+    position: absolute;
+    z-index: 30;
+    pointer-events: none;
+}
+
+.playerBullet {
+    font-size: 22px;
+}
+
+.enemyBullet {
+    font-size: 22px;
+}
+
+/* CONTROLS */
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 8px;
+}
+
+.controls button {
+    width: 82px;
+    height: 58px;
+    border: 0;
+    border-radius: 12px;
+    font-size: 21px;
+    font-weight: bold;
+    touch-action: none;
+}
+
+#fireButton {
+    width: 115px;
+    background: #dc2626;
+    color: white;
+}
+
+/* GAME OVER */
+
+#gameOver {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.92);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#gameOver button {
+    padding: 12px 25px;
+    border: 0;
+    border-radius: 10px;
+    background: #22c55e;
+    color: white;
+    font-size: 18px;
+}
+</style>
 </head>
 
 <body>
 
+<!-- CHARACTER MENU -->
+
+<div id="menu">
+
     <h1>FAMILY BATTLE</h1>
 
-    <div id="hud">
+    <p>Choose your fighter</p>
 
-        <div class="playerStats">
+    <div class="characters">
 
-            <strong>SUCCESS</strong>
+        <button class="character" data-name="Mr Odey">
+            👨<br>Mr Odey
+        </button>
 
-            <div class="health">
-                <div id="playerHealth"></div>
-            </div>
+        <button class="character" data-name="Mrs Odey">
+            👩<br>Mrs Odey
+        </button>
 
-            <span id="playerHealthText">
-                1000 / 1000
-            </span>
+        <button class="character" data-name="Marvellous">
+            🧑<br>Marvellous
+        </button>
 
-        </div>
+        <button class="character selected" data-name="Success">
+            🦸<br>Success
+        </button>
 
-        <div id="kills">
-            KILLS:
-            <span id="killCount">0</span>
-        </div>
+        <button class="character" data-name="Perfect">
+            🧑<br>Perfect
+        </button>
 
     </div>
 
+    <button id="startButton">
+        START BATTLE
+    </button>
+
+</div>
+
+
+<!-- GAME -->
+
+<div id="gameArea">
+
+    <div id="hud">
+
+        <div>
+            <strong id="playerName">SUCCESS</strong>
+
+            <div class="healthBox">
+                <div id="healthBar"></div>
+            </div>
+
+            <span id="healthText">
+                1000 / 1000
+            </span>
+        </div>
+
+        <div>
+            KILLS:
+            <strong id="killCount">0</strong>
+        </div>
+
+    </div>
 
     <div id="game">
 
@@ -49,19 +296,799 @@
 
     </div>
 
-
     <div class="controls">
 
-        <button id="leftBtn">◀</button>
+        <button id="leftButton">◀</button>
 
         <button id="fireButton">🔥 FIRE</button>
 
-        <button id="rightBtn">▶</button>
+        <button id="rightButton">▶</button>
 
     </div>
 
+</div>
 
-    <script src="script.js"></script>
+
+<!-- GAME OVER -->
+
+<div id="gameOver">
+
+    <h1>GAME OVER</h1>
+
+    <p>
+        <span id="finalName">Success</span>
+    </p>
+
+    <p>
+        Kills:
+        <span id="finalKills">0</span>
+    </p>
+
+    <button onclick="location.reload()">
+        PLAY AGAIN
+    </button>
+
+</div>
+
+
+<script>
+
+/* ==========================
+   CHARACTER DATA
+========================== */
+
+const characters = {
+
+    "Mr Odey": {
+        emoji: "👨",
+        health: 1400,
+        speed: 5
+    },
+
+    "Mrs Odey": {
+        emoji: "👩",
+        health: 1300,
+        speed: 6
+    },
+
+    "Marvellous": {
+        emoji: "🧑",
+        health: 1200,
+        speed: 7
+    },
+
+    "Success": {
+        emoji: "🦸",
+        health: 2000,
+        speed: 12
+    },
+
+    "Perfect": {
+        emoji: "🧑",
+        health: 1500,
+        speed: 8
+    }
+
+};
+
+
+let selectedCharacter = "Success";
+
+
+/* ==========================
+   MENU
+========================== */
+
+document
+.querySelectorAll(".character")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        document
+        .querySelectorAll(".character")
+        .forEach(b =>
+            b.classList.remove("selected")
+        );
+
+        button.classList.add("selected");
+
+        selectedCharacter =
+            button.dataset.name;
+
+    });
+
+});
+
+
+/* ==========================
+   GAME VARIABLES
+========================== */
+
+const game =
+    document.getElementById("game");
+
+const player =
+    document.getElementById("player");
+
+const leftButton =
+    document.getElementById("leftButton");
+
+const rightButton =
+    document.getElementById("rightButton");
+
+const fireButton =
+    document.getElementById("fireButton");
+
+const healthBar =
+    document.getElementById("healthBar");
+
+const healthText =
+    document.getElementById("healthText");
+
+const killCount =
+    document.getElementById("killCount");
+
+const playerName =
+    document.getElementById("playerName");
+
+
+let playerX = 50;
+
+let playerHealth = 1000;
+
+let playerMaxHealth = 1000;
+
+let playerSpeed = 8;
+
+let movingLeft = false;
+
+let movingRight = false;
+
+let bullets = [];
+
+let enemyBullets = [];
+
+let enemies = [];
+
+let kills = 0;
+
+let running = false;
+
+let lastShot = 0;
+
+
+/* ==========================
+   START GAME
+========================== */
+
+document
+.getElementById("startButton")
+.addEventListener("click", () => {
+
+    const character =
+        characters[selectedCharacter];
+
+    playerHealth =
+        character.health;
+
+    playerMaxHealth =
+        character.health;
+
+    playerSpeed =
+        character.speed;
+
+    player.textContent =
+        character.emoji;
+
+    playerName.textContent =
+        selectedCharacter.toUpperCase();
+
+    healthText.textContent =
+        playerHealth +
+        " / " +
+        playerMaxHealth;
+
+    healthBar.style.width =
+        "100%";
+
+    document
+    .getElementById("menu")
+    .style.display = "none";
+
+    running = true;
+
+    spawnEnemy();
+
+    spawnEnemy();
+
+    spawnEnemy();
+
+});
+
+
+/* ==========================
+   MOVEMENT
+========================== */
+
+function updateMovement() {
+
+    if (!running) return;
+
+    if (movingLeft) {
+
+        playerX -=
+            playerSpeed / 10;
+
+    }
+
+    if (movingRight) {
+
+        playerX +=
+            playerSpeed / 10;
+
+    }
+
+    playerX =
+        Math.max(
+            5,
+            Math.min(95, playerX)
+        );
+
+    player.style.left =
+        playerX + "%";
+
+}
+
+
+/* ==========================
+   BUTTON MOVEMENT
+========================== */
+
+leftButton.addEventListener(
+    "pointerdown",
+    e => {
+        e.preventDefault();
+        movingLeft = true;
+    }
+);
+
+leftButton.addEventListener(
+    "pointerup",
+    () => {
+        movingLeft = false;
+    }
+);
+
+leftButton.addEventListener(
+    "pointercancel",
+    () => {
+        movingLeft = false;
+    }
+);
+
+
+rightButton.addEventListener(
+    "pointerdown",
+    e => {
+        e.preventDefault();
+        movingRight = true;
+    }
+);
+
+rightButton.addEventListener(
+    "pointerup",
+    () => {
+        movingRight = false;
+    }
+);
+
+rightButton.addEventListener(
+    "pointercancel",
+    () => {
+        movingRight = false;
+    }
+);
+
+
+/* ==========================
+   SHOOT
+========================== */
+
+function shoot() {
+
+    if (!running) return;
+
+    const now =
+        Date.now();
+
+    if (
+        now - lastShot <
+        180
+    ) {
+        return;
+    }
+
+    lastShot = now;
+
+    const bullet =
+        document.createElement("div");
+
+    bullet.className =
+        "playerBullet";
+
+    bullet.textContent =
+        "🔥";
+
+    bullet.style.left =
+        playerX + "%";
+
+    bullet.style.bottom =
+        "90px";
+
+    game.appendChild(
+        bullet
+    );
+
+    bullets.push(
+        bullet
+    );
+}
+
+
+fireButton.addEventListener(
+    "pointerdown",
+    e => {
+        e.preventDefault();
+        shoot();
+    }
+);
+
+
+/* ==========================
+   ENEMY CREATION
+========================== */
+
+function spawnEnemy() {
+
+    if (!running) return;
+
+    const enemy =
+        document.createElement("div");
+
+    enemy.className =
+        "enemy";
+
+    enemy.innerHTML = `
+        <div class="enemyHp">
+            <div class="enemyHpBar"></div>
+        </div>
+
+        <div class="enemyBody">👾</div>
+    `;
+
+    enemy.style.left =
+        Math.random() * 90 + 5 + "%";
+
+    enemy.style.top =
+        "-70px";
+
+    enemy.health =
+        100;
+
+    enemy.speed =
+        0.4 +
+        Math.random() * 0.5;
+
+    enemy.lastShot =
+        Date.now();
+
+    enemy.shootDelay =
+        3000 +
+        Math.random() * 2500;
+
+    game.appendChild(
+        enemy
+    );
+
+    enemies.push(
+        enemy
+    );
+}
+
+
+/* ==========================
+   COLLISION
+========================== */
+
+function collision(a, b) {
+
+    const A =
+        a.getBoundingClientRect();
+
+    const B =
+        b.getBoundingClientRect();
+
+    return (
+        A.left < B.right &&
+        A.right > B.left &&
+        A.top < B.bottom &&
+        A.bottom > B.top
+    );
+}
+
+
+/* ==========================
+   PLAYER BULLETS
+========================== */
+
+function updateBullets() {
+
+    for (
+        let i = bullets.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const bullet =
+            bullets[i];
+
+        let bottom =
+            parseFloat(
+                bullet.style.bottom
+            );
+
+        bottom += 15;
+
+        bullet.style.bottom =
+            bottom + "px";
+
+
+        for (
+            let j = enemies.length - 1;
+            j >= 0;
+            j--
+        ) {
+
+            const enemy =
+                enemies[j];
+
+            if (
+                collision(
+                    bullet,
+                    enemy
+                )
+            ) {
+
+                enemy.health -= 25;
+
+                const hp =
+                    enemy.querySelector(
+                        ".enemyHpBar"
+                    );
+
+                hp.style.width =
+                    enemy.health + "%";
+
+
+                bullet.remove();
+
+                bullets.splice(
+                    i,
+                    1
+                );
+
+
+                if (
+                    enemy.health <= 0
+                ) {
+
+                    enemy.remove();
+
+                    enemies.splice(
+                        j,
+                        1
+                    );
+
+                    kills++;
+
+                    killCount.textContent =
+                        kills;
+
+                    setTimeout(
+                        spawnEnemy,
+                        400
+                    );
+                }
+
+                break;
+            }
+        }
+
+
+        if (
+            bottom >
+            game.clientHeight
+        ) {
+
+            bullet.remove();
+
+            bullets.splice(
+                i,
+                1
+            );
+        }
+    }
+}
+
+
+/* ==========================
+   ENEMY PROJECTILES
+========================== */
+
+function enemyShoot(enemy) {
+
+    const bullet =
+        document.createElement("div");
+
+    bullet.className =
+        "enemyBullet";
+
+    bullet.textContent =
+        "💣";
+
+    const enemyX =
+        parseFloat(enemy.style.left);
+
+    const enemyY =
+        parseFloat(enemy.style.top);
+
+    bullet.style.left =
+        enemyX + 30 + "px";
+
+    bullet.style.top =
+        enemyY + 50 + "px";
+
+    game.appendChild(
+        bullet
+    );
+
+    enemyBullets.push(
+        bullet
+    );
+}
+
+
+/* ==========================
+   ENEMY UPDATE
+========================== */
+
+function updateEnemies() {
+
+    const now =
+        Date.now();
+
+    enemies.forEach(
+        enemy => {
+
+            let top =
+                parseFloat(
+                    enemy.style.top
+                );
+
+            top +=
+                enemy.speed;
+
+            enemy.style.top =
+                top + "px";
+
+
+            /* Enemy shoots slowly */
+
+            if (
+                now - enemy.lastShot >
+                enemy.shootDelay
+            ) {
+
+                enemy.lastShot =
+                    now;
+
+                enemyShoot(enemy);
+            }
+
+
+            /* Enemy reaches player */
+
+            if (
+                collision(
+                    enemy,
+                    player
+                )
+            ) {
+
+                damagePlayer(20);
+
+                enemy.remove();
+
+                enemies =
+                    enemies.filter(
+                        e => e !== enemy
+                    );
+
+                setTimeout(
+                    spawnEnemy,
+                    500
+                );
+            }
+
+
+            if (
+                top >
+                game.clientHeight
+            ) {
+
+                enemy.remove();
+
+                enemies =
+                    enemies.filter(
+                        e => e !== enemy
+                    );
+
+                setTimeout(
+                    spawnEnemy,
+                    500
+                );
+            }
+
+        }
+    );
+}
+
+
+/* ==========================
+   ENEMY BULLETS
+========================== */
+
+function updateEnemyBullets() {
+
+    for (
+        let i =
+        enemyBullets.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const bullet =
+            enemyBullets[i];
+
+        let top =
+            parseFloat(
+                bullet.style.top
+            );
+
+        top += 5;
+
+        bullet.style.top =
+            top + "px";
+
+
+        if (
+            collision(
+                bullet,
+                player
+            )
+        ) {
+
+            damagePlayer(15);
+
+            bullet.remove();
+
+            enemyBullets.splice(
+                i,
+                1
+            );
+
+            continue;
+        }
+
+
+        if (
+            top >
+            game.clientHeight
+        ) {
+
+            bullet.remove();
+
+            enemyBullets.splice(
+                i,
+                1
+            );
+        }
+    }
+}
+
+
+/* ==========================
+   PLAYER DAMAGE
+========================== */
+
+function damagePlayer(amount) {
+
+    playerHealth -=
+        amount;
+
+    if (
+        playerHealth < 0
+    ) {
+        playerHealth = 0;
+    }
+
+    healthBar.style.width =
+        (
+            playerHealth /
+            playerMaxHealth *
+            100
+        ) + "%";
+
+    healthText.textContent =
+        playerHealth +
+        " / " +
+        playerMaxHealth;
+
+
+    if (
+        playerHealth <= 0
+    ) {
+
+        running = false;
+
+        document
+        .getElementById(
+            "finalName"
+        )
+        .textContent =
+            selectedCharacter;
+
+        document
+        .getElementById(
+            "finalKills"
+        )
+        .textContent =
+            kills;
+
+        document
+        .getElementById(
+            "gameOver"
+        )
+        .style.display =
+            "flex";
+    }
+}
+
+
+/* ==========================
+   MAIN LOOP
+========================== */
+
+function gameLoop() {
+
+    updateMovement();
+
+    updateBullets();
+
+    updateEnemyBullets();
+
+    updateEnemies();
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+
+gameLoop();
+
+</script>
 
 </body>
 </html>
