@@ -100,7 +100,6 @@ rightBtn.addEventListener("touchend", e => {
     stopMoving(1);
 });
 
-
 // Keyboard controls
 
 document.addEventListener("keydown", function(event) {
