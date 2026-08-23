@@ -41,7 +41,7 @@ let lastDamage = 0;
 function movePlayer(direction) {
 
     // MUCH faster movement
-    playerX += direction * 12;
+    playerX += direction * 25;
 
     if (playerX < 5) {
         playerX = 5;
