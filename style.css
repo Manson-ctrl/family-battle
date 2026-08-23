@@ -1,3 +1,23 @@
+function enemyShoot(enemy) {
+
+    const projectile =
+        document.createElement("div");
+
+    projectile.className =
+        "enemyBullet";
+
+    projectile.textContent = "💣";
+
+    projectile.style.left =
+        enemy.style.left;
+
+    projectile.style.top =
+        (parseFloat(enemy.style.top) + 50) + "px";
+
+    game.appendChild(projectile);
+
+    enemyBullets.push(projectile);
+}
 * {
     box-sizing: border-box;
 }
