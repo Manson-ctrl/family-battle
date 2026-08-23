@@ -83,91 +83,40 @@ function updatePlayerMovement() {
 
     player.style.left =
         playerX + "%";
+
 }
+// ============================
+// MOBILE MOVEMENT
+// ============================
+
+leftBtn.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    movingLeft = true;
+});
+
+leftBtn.addEventListener("touchend", function(e) {
+    e.preventDefault();
+    movingLeft = false;
+});
+
+leftBtn.addEventListener("touchcancel", function() {
+    movingLeft = false;
+});
 
 
-// ======================================
-// MOBILE CONTROLS
-// ======================================
+rightBtn.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    movingRight = true;
+});
 
-// LEFT
+rightBtn.addEventListener("touchend", function(e) {
+    e.preventDefault();
+    movingRight = false;
+});
 
-leftBtn.addEventListener(
-    "pointerdown",
-    function(event) {
-
-        event.preventDefault();
-
-        movingLeft = true;
-    }
-);
-
-
-leftBtn.addEventListener(
-    "pointerup",
-    function() {
-
-        movingLeft = false;
-    }
-);
-
-
-leftBtn.addEventListener(
-    "pointercancel",
-    function() {
-
-        movingLeft = false;
-    }
-);
-
-
-leftBtn.addEventListener(
-    "pointerleave",
-    function() {
-
-        movingLeft = false;
-    }
-);
-
-
-// RIGHT
-
-rightBtn.addEventListener(
-    "pointerdown",
-    function(event) {
-
-        event.preventDefault();
-
-        movingRight = true;
-    }
-);
-
-
-rightBtn.addEventListener(
-    "pointerup",
-    function() {
-
-        movingRight = false;
-    }
-);
-
-
-rightBtn.addEventListener(
-    "pointercancel",
-    function() {
-
-        movingRight = false;
-    }
-);
-
-
-rightBtn.addEventListener(
-    "pointerleave",
-    function() {
-
-        movingRight = false;
-    }
-);
+rightBtn.addEventListener("touchcancel", function() {
+    movingRight = false;
+});
 
 
 // ======================================
