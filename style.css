@@ -1,3 +1,51 @@
+function updateEnemyBullets() {
+
+    for (
+        let i = enemyBullets.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const bullet =
+            enemyBullets[i];
+
+        let top =
+            parseFloat(bullet.style.top);
+
+        top += 6;
+
+        bullet.style.top =
+            top + "px";
+
+
+        if (
+            checkCollision(
+                bullet,
+                player
+            )
+        ) {
+
+            bullet.remove();
+
+            enemyBullets.splice(i, 1);
+
+            damagePlayer(15);
+
+            continue;
+        }
+
+
+        if (
+            top >
+            game.clientHeight
+        ) {
+
+            bullet.remove();
+
+            enemyBullets.splice(i, 1);
+        }
+    }
+}
 function enemyShoot(enemy) {
 
     const projectile =
