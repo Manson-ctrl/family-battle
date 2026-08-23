@@ -530,10 +530,38 @@ function gameLoop() {
 }
 
 
-gameLoop();
+function gameLoop() {
+
+    updatePlayerMovement();
+
+    updateBullets();
+
+    updateEnemies();
+
+    requestAnimationFrame(gameLoop);
+}
                 
 
-                
+     function updatePlayerMovement() {
+
+    if (movingLeft) {
+        playerX -= 1.8;
+    }
+
+    if (movingRight) {
+        playerX += 1.8;
+    }
+
+    if (playerX < 5) {
+        playerX = 5;
+    }
+
+    if (playerX > 95) {
+        playerX = 95;
+    }
+
+    player.style.left = playerX + "%";
+}           
 
                     
 
