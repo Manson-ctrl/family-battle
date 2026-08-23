@@ -57,25 +57,47 @@ function movePlayer(direction) {
 
 // Phone controls
 
-leftBtn.addEventListener("touchstart", function(e) {
+let movingLeft = false;
+let movingRight = false;
+
+function startMoving(direction) {
+    if (direction === -1) {
+        movingLeft = true;
+    }
+
+    if (direction === 1) {
+        movingRight = true;
+    }
+}
+
+function stopMoving(direction) {
+    if (direction === -1) {
+        movingLeft = false;
+    }
+
+    if (direction === 1) {
+        movingRight = false;
+    }
+}
+
+leftBtn.addEventListener("touchstart", e => {
     e.preventDefault();
-    movePlayer(-1);
+    startMoving(-1);
 });
 
-rightBtn.addEventListener("touchstart", function(e) {
+leftBtn.addEventListener("touchend", e => {
     e.preventDefault();
-    movePlayer(1);
+    stopMoving(-1);
 });
 
-
-// Also allow tapping
-
-leftBtn.addEventListener("click", function() {
-    movePlayer(-1);
+rightBtn.addEventListener("touchstart", e => {
+    e.preventDefault();
+    startMoving(1);
 });
 
-rightBtn.addEventListener("click", function() {
-    movePlayer(1);
+rightBtn.addEventListener("touchend", e => {
+    e.preventDefault();
+    stopMoving(1);
 });
 
 
