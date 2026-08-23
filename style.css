@@ -119,6 +119,17 @@ h1 {
     overflow: hidden;
 
     border: 2px solid white;
+const now = Date.now();
+
+if (
+    now - enemy.lastAttack >
+    enemy.attackDelay
+) {
+
+    enemy.lastAttack = now;
+
+    enemyShoot(enemy);
+}
 }
 
 
