@@ -59,12 +59,12 @@ function updatePlayerMovement() {
 
     if (movingLeft) {
 
-        playerX -= PLAYER_SPEED;
+        playerX -= PLAYER_SPEED;1.5
     }
 
     if (movingRight) {
 
-        playerX += PLAYER_SPEED;
+        playerX += PLAYER_SPEED;1.5
     }
 
 
