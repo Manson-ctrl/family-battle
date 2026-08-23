@@ -1,202 +1,287 @@
+/* ============================
+   GAME SETUP
+============================ */
+
 const game = document.getElementById("game");
 const player = document.getElementById("player");
+const playerHealth = document.getElementById("playerHealth");
+const killsDisplay = document.getElementById("kills");
 
-const leftBtn = document.getElementById("leftBtn");
-const rightBtn = document.getElementById("rightBtn");
-const fireButton = document.getElementById("fireButton");
-
-const playerHealthBar =
-    document.getElementById("playerHealth");
-
-const playerHealthText =
-    document.getElementById("playerHealthText");
-
-const killCount =
-    document.getElementById("killCount");
-
-
-// ============================
-// GAME VARIABLES
-// ============================
-
-let playerX = 50;
-
-let playerHealth = 100;
+const enemyBullets = [];
+const bullets = [];
+const enemies = [];
 
 let kills = 0;
-
-let bullets = [];
-
-let enemies = [];
-
-let lastShot = 0;
-
-let lastDamage = 0;
+let health = 100;
 
 
-// ============================
-// PLAYER MOVEMENT
-// ============================
+/* ============================
+   PLAYER DAMAGE
+============================ */
 
-function movePlayer(direction) {
+function damagePlayer(amount) {
 
-    // MUCH faster movement
-    playerX += direction * 25;
+    health -= amount;
 
-    if (playerX < 5) {
-        playerX = 5;
+    if (health < 0) {
+        health = 0;
     }
 
-    if (playerX > 95) {
-        playerX = 95;
-    }
+    playerHealth.style.width = health + "%";
 
-    player.style.left = playerX + "%";
-}
-
-
-// Phone controls
-
-let movingLeft = false;
-let movingRight = false;
-
-function startMoving(direction) {
-    if (direction === -1) {
-        movingLeft = true;
-    }
-
-    if (direction === 1) {
-        movingRight = true;
+    if (health <= 0) {
+        gameOver();
     }
 }
 
-function stopMoving(direction) {
-    if (direction === -1) {
-        movingLeft = false;
-    }
 
-    if (direction === 1) {
-        movingRight = false;
+/* ============================
+   GAME OVER
+============================ */
+
+function gameOver() {
+
+    alert("GAME OVER");
+
+    location.reload();
+}
+
+
+/* ============================
+   COLLISION
+============================ */
+
+function checkCollision(a, b) {
+
+    const rectA = a.getBoundingClientRect();
+    const rectB = b.getBoundingClientRect();
+
+    return (
+        rectA.left < rectB.right &&
+        rectA.right > rectB.left &&
+        rectA.top < rectB.bottom &&
+        rectA.bottom > rectB.top
+    );
+}
+
+
+/* ============================
+   ENEMY SHOOTING
+============================ */
+
+function enemyShoot(enemy) {
+
+    const projectile = document.createElement("div");
+
+    projectile.className = "enemyBullet";
+
+    projectile.textContent = "💣";
+
+    const enemyLeft =
+        parseFloat(enemy.style.left) || 0;
+
+    const enemyTop =
+        parseFloat(enemy.style.top) || 0;
+
+    projectile.style.left =
+        enemyLeft + 20 + "px";
+
+    projectile.style.top =
+        enemyTop + 50 + "px";
+
+    game.appendChild(projectile);
+
+    enemyBullets.push(projectile);
+}
+
+
+/* ============================
+   UPDATE ENEMY BULLETS
+============================ */
+
+function updateEnemyBullets() {
+
+    for (
+        let i = enemyBullets.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const bullet = enemyBullets[i];
+
+        let top =
+            parseFloat(bullet.style.top) || 0;
+
+        // FAST enemy bullets
+        top += 8;
+
+        bullet.style.top =
+            top + "px";
+
+
+        /* Hit player */
+
+        if (
+            checkCollision(
+                bullet,
+                player
+            )
+        ) {
+
+            bullet.remove();
+
+            enemyBullets.splice(i, 1);
+
+            damagePlayer(15);
+
+            continue;
+        }
+
+
+        /* Bullet leaves screen */
+
+        if (
+            top >
+            game.clientHeight
+        ) {
+
+            bullet.remove();
+
+            enemyBullets.splice(i, 1);
+        }
     }
 }
 
-leftBtn.addEventListener("touchstart", e => {
-    e.preventDefault();
-    startMoving(-1);
-});
 
-leftBtn.addEventListener("touchend", e => {
-    e.preventDefault();
-    stopMoving(-1);
-});
+/* ============================
+   UPDATE ENEMIES
+============================ */
 
-rightBtn.addEventListener("touchstart", e => {
-    e.preventDefault();
-    startMoving(1);
-});
-
-rightBtn.addEventListener("touchend", e => {
-    e.preventDefault();
-    stopMoving(1);
-});
-
-// Keyboard controls
-
-document.addEventListener("keydown", function(event) {
-
-    if (event.key === "ArrowLeft") {
-        movePlayer(-1);
-    }
-
-    if (event.key === "ArrowRight") {
-        movePlayer(1);
-    }
-
-    if (event.code === "Space") {
-        shoot();
-    }
-
-});
-
-
-// ============================
-// SHOOTING
-// ============================
-
-function shoot() {
+function updateEnemies() {
 
     const now = Date.now();
 
-    if (now - lastShot < 250) {
-        return;
+    for (
+        let i = enemies.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const enemy = enemies[i];
+
+
+        /* ========================
+           ENEMY SHOOTING
+        ======================== */
+
+        if (
+            now - enemy.lastAttack >=
+            enemy.attackDelay
+        ) {
+
+            enemy.lastAttack = now;
+
+            enemyShoot(enemy);
+        }
+
+
+        /* ========================
+           ENEMY MOVEMENT
+        ======================== */
+
+        let top =
+            parseFloat(enemy.style.top) || 0;
+
+        top += enemy.speed || 1;
+
+        enemy.style.top =
+            top + "px";
+
+
+        /* Remove enemy if
+           it reaches bottom */
+
+        if (
+            top >
+            game.clientHeight
+        ) {
+
+            enemy.remove();
+
+            enemies.splice(i, 1);
+        }
     }
-
-    lastShot = now;
-
-    const bullet = document.createElement("div");
-
-    bullet.className = "bullet";
-
-    bullet.textContent = "🔵";
-
-    bullet.style.left = playerX + "%";
-
-    bullet.style.bottom = "100px";
-
-    game.appendChild(bullet);
-
-    bullets.push(bullet);
 }
 
 
-// FIRE BUTTON
+/* ============================
+   CREATE ENEMY
+============================ */
 
-fireButton.addEventListener("click", shoot);
+function createEnemy() {
 
-fireButton.addEventListener("touchstart", function(e) {
-
-    e.preventDefault();
-
-    shoot();
-
-});
-
-
-// ============================
-// CREATE ENEMY
-// ============================
-
-function spawnEnemy() {
-
-    const enemy = document.createElement("div");
+    const enemy =
+        document.createElement("div");
 
     enemy.className = "enemy";
 
-    enemy.innerHTML = `
-        <div class="enemyHp">
-            <div class="enemyHpBar"></div>
-        </div>
-        <div class="enemyBody">👾</div>
-    `;
 
-    // Random horizontal position
+    /* Enemy body */
 
-    const x = 5 + Math.random() * 90;
+    const body =
+        document.createElement("div");
 
-    enemy.style.left = x + "%";
+    body.className = "enemyBody";
 
-    enemy.style.top = "-70px";
+    body.textContent = "👾";
 
-    enemy.health = 100;
 
-    // Different enemy speeds
+    /* Health bar */
+
+    const hp =
+        document.createElement("div");
+
+    hp.className = "enemyHp";
+
+
+    const hpBar =
+        document.createElement("div");
+
+    hpBar.className = "enemyHpBar";
+
+    hp.appendChild(hpBar);
+
+
+    enemy.appendChild(body);
+    enemy.appendChild(hp);
+
+    /* Random position */
+
+    const maxLeft =
+        game.clientWidth - 65;
+
+    const left =
+        Math.random() * maxLeft;
+
+    enemy.style.left =
+        left + "px";
+
+    enemy.style.top =
+        "-70px";
+
+
+    /* Enemy settings */
 
     enemy.speed =
-        1.5 + Math.random() * 2;
+        0.8 + Math.random() * 1.2;
 
-    // Attack cooldown
+    enemy.lastAttack =
+        Date.now();
 
-    enemy.lastAttack = 0;
+    // Fast enemy shooting
+    enemy.attackDelay =
+        700 + Math.random() * 500;
+
 
     game.appendChild(enemy);
 
@@ -204,22 +289,54 @@ function spawnEnemy() {
 }
 
 
-// Start with 5 enemies
+/* ============================
+   SPAWN ENEMIES
+============================ */
 
-for (let i = 0; i < 5; i++) {
+setInterval(() => {
 
-    setTimeout(function() {
+    createEnemy();
 
-        spawnEnemy();
+}, 1200);
 
-    }, i * 500);
 
+/* ============================
+   PLAYER SHOOTING
+============================ */
+
+function playerShoot() {
+
+    const bullet =
+        document.createElement("div");
+
+    bullet.className = "bullet";
+
+    bullet.textContent = "🔥";
+
+
+    const playerLeft =
+        player.offsetLeft;
+
+    const playerTop =
+        player.offsetTop;
+
+
+    bullet.style.left =
+        playerLeft + "px";
+
+    bullet.style.top =
+        playerTop - 25 + "px";
+
+
+    game.appendChild(bullet);
+
+    bullets.push(bullet);
 }
 
 
-// ============================
-// BULLET UPDATE
-// ============================
+/* ============================
+   UPDATE PLAYER BULLETS
+============================ */
 
 function updateBullets() {
 
@@ -229,19 +346,23 @@ function updateBullets() {
         i--
     ) {
 
-        const bullet = bullets[i];
+        const bullet =
+            bullets[i];
 
-        let bottom =
-            parseFloat(bullet.style.bottom);
+        let top =
+            parseFloat(bullet.style.top) || 0;
 
-        bottom += 14;
+        // FAST player bullets
+        top -= 12;
 
-        bullet.style.bottom =
-            bottom + "px";
+        bullet.style.top =
+            top + "px";
 
 
-        // Check collision
-        // with every enemy
+        let hitEnemy = false;
+
+
+        /* Check enemy collisions */
 
         for (
             let j = enemies.length - 1;
@@ -249,41 +370,48 @@ function updateBullets() {
             j--
         ) {
 
-            const enemy = enemies[j];
+            const enemy =
+                enemies[j];
 
-            if (checkCollision(bullet, enemy)) {
 
-                // Bullet damage
-
-                enemy.health -= 25;
-
-                updateEnemyHealth(enemy);
+            if (
+                checkCollision(
+                    bullet,
+                    enemy
+                )
+            ) {
 
                 bullet.remove();
 
                 bullets.splice(i, 1);
 
+                enemy.remove();
 
-                // Enemy dies ONLY at zero
+                enemies.splice(j, 1);
 
-                if (enemy.health <= 0) {
+                kills++;
 
-                    killEnemy(enemy, j);
-
+                if (killsDisplay) {
+                    killsDisplay.textContent =
+                        "Kills: " + kills;
                 }
+
+                hitEnemy = true;
 
                 break;
             }
         }
 
 
-        // Remove bullet
-        // outside game
+        if (hitEnemy) {
+            continue;
+        }
 
-        if (
-            bottom >
-            game.clientHeight
-        ) {
+
+        /* Remove bullet
+           when it leaves screen */
+
+        if (top < -30) {
 
             bullet.remove();
 
@@ -293,264 +421,34 @@ function updateBullets() {
 }
 
 
-// ============================
-// ENEMY HEALTH
-// ============================
-
-function updateEnemyHealth(enemy) {
-
-    const bar =
-        enemy.querySelector(".enemyHpBar");
-
-    bar.style.width =
-        enemy.health + "%";
-}
-
-
-// ============================
-// KILL ENEMY
-// ============================
-
-function killEnemy(enemy, index) {
-
-    enemy.remove();
-
-    enemies.splice(index, 1);
-
-    kills++;
-
-    killCount.textContent =
-        kills;
-
-    // Spawn replacement
-
-    setTimeout(function() {
-
-        spawnEnemy();
-
-    }, 300);
-}
-
-
-// ============================
-// ENEMY MOVEMENT + ATTACK
-// ============================
-
-function updateEnemies() {
-
-    const playerRect =
-        player.getBoundingClientRect();
-
-
-    enemies.forEach(function(enemy) {
-
-        let top =
-            parseFloat(enemy.style.top);
-
-
-        // Enemy falls FAST
-
-        top += enemy.speed;
-
-
-        enemy.style.top =
-            top + "px";
-
-
-        const enemyRect =
-            enemy.getBoundingClientRect();
-
-
-        // Enemy attacks when
-        // close to Success
-
-        const verticalDistance =
-            Math.abs(
-                enemyRect.bottom -
-                playerRect.top
-            );
-
-
-        const horizontalDistance =
-            Math.abs(
-                enemyRect.left -
-                playerRect.left
-            );
-
-
-        if (
-            verticalDistance < 80 &&
-            horizontalDistance < 70
-        ) {
-
-            const now = Date.now();
-
-
-            // Damage once every 700ms
-
-            if (
-                now - enemy.lastAttack >
-                700
-            ) {
-
-                enemy.lastAttack =
-                    now;
-
-                damagePlayer(10);
-            }
-        }
-
-
-        // Enemy passes the player
-
-        if (
-            top >
-            game.clientHeight
-        ) {
-
-            enemy.remove();
-
-            enemies =
-                enemies.filter(function(item) {
-
-                    return item !== enemy;
-
-                });
-
-            spawnEnemy();
-        }
-
-    });
-}
-
-
-// ============================
-// PLAYER DAMAGE
-// ============================
-
-function damagePlayer(amount) {
-
-    const now = Date.now();
-
-    if (
-        now - lastDamage <
-        300
-    ) {
-        return;
-    }
-
-    lastDamage = now;
-
-    playerHealth -= amount;
-
-
-    if (playerHealth < 0) {
-
-        playerHealth = 0;
-
-    }
-
-
-    playerHealthBar.style.width =
-        playerHealth + "%";
-
-    playerHealthText.textContent =
-        playerHealth + " / 100";
-
-
-    // Game over
-
-    if (playerHealth <= 0) {
-
-        gameOver();
-
-    }
-}
-
-
-// ============================
-// GAME OVER
-// ============================
-
-function gameOver() {
-
-    alert(
-        "SUCCESS HAS FALLEN!\n\n" +
-        "Kills: " + kills
+/* ============================
+   FIRE BUTTON
+============================ */
+
+const fireButton =
+    document.getElementById(
+        "fireButton"
     );
 
-    location.reload();
-}
 
+if (fireButton) {
 
-// ============================
-// COLLISION
-// ============================
-
-function checkCollision(a, b) {
-
-    const rectA =
-        a.getBoundingClientRect();
-
-    const rectB =
-        b.getBoundingClientRect();
-
-
-    return (
-
-        rectA.left <
-        rectB.right &&
-
-        rectA.right >
-        rectB.left &&
-
-        rectA.top <
-        rectB.bottom &&
-
-        rectA.bottom >
-        rectB.top
-
+    fireButton.addEventListener(
+        "click",
+        playerShoot
     );
 }
 
 
-// ============================
-// GAME LOOP
-// ============================
+/* ============================
+   PLAYER MOVEMENT
+============================ */
 
-function gameLoop() {
+let playerX = 50;
 
-    updateBullets();
+function movePlayer(direction) {
 
-    updateEnemies();
-
-    requestAnimationFrame(
-        gameLoop
-    );
-}
-
-
-function gameLoop() {
-
-    updatePlayerMovement();
-
-    updateBullets();
-
-    updateEnemies();
-
-    requestAnimationFrame(gameLoop);
-}
-                
-
-     function updatePlayerMovement() {
-
-    if (movingLeft) {
-        playerX -= 1.8;
-    }
-
-    if (movingRight) {
-        playerX += 1.8;
-    }
+    playerX += direction * 5;
 
     if (playerX < 5) {
         playerX = 5;
@@ -560,8 +458,70 @@ function gameLoop() {
         playerX = 95;
     }
 
-    player.style.left = playerX + "%";
-}           
+    player.style.left =
+        playerX + "%";
+}
+
+
+/* ============================
+   KEYBOARD CONTROLS
+============================ */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "ArrowLeft" ||
+            event.key.toLowerCase() === "a"
+        ) {
+
+            movePlayer(-1);
+        }
+
+
+        if (
+            event.key === "ArrowRight" ||
+            event.key.toLowerCase() === "d"
+        ) {
+
+            movePlayer(1);
+        }
+
+
+        if (
+            event.code === "Space"
+        ) {
+
+            playerShoot();
+        }
+    }
+);
+
+
+/* ============================
+   GAME LOOP
+============================ */
+
+function gameLoop() {
+
+    updateEnemies();
+
+    updateEnemyBullets();
+
+    updateBullets();
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+
+/* ============================
+   START GAME
+============================ */
+
+gameLoop();         
 
                     
 
